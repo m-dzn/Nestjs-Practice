@@ -4,7 +4,7 @@ import type { AppProps } from "next/app";
 import { ThemeProvider } from "@emotion/react";
 
 import { Layout } from "@/components";
-import { lightTheme } from "@/styles";
+import { GlobalStyles, lightTheme } from "@/styles";
 
 type NextPageWithLayout = NextPage & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -19,6 +19,7 @@ function MyApp({ Component, pageProps }: AppPropsWithLayout) {
 
   return (
     <ThemeProvider theme={lightTheme}>
+      <GlobalStyles />
       {getLayout(<Component {...pageProps} />)}
     </ThemeProvider>
   );
