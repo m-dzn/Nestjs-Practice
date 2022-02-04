@@ -6,9 +6,6 @@ import { CustomWinstonModule } from "@/common";
 import { getOrmConfig } from "@/config";
 import { modules } from "@/module";
 
-import { AppController } from "./app.controller";
-import { AppService } from "./app.service";
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -23,7 +20,5 @@ import { AppService } from "./app.service";
     CustomWinstonModule,
     ...modules,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

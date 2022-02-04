@@ -1,3 +1,1 @@
-import { SampleModule } from "./sample";
-
-export const modules = [SampleModule];
+export const modules = [];
