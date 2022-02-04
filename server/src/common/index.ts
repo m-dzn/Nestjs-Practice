@@ -1,1 +1,1 @@
-export * from "./custom-winston-module";
+export * from "./module";
