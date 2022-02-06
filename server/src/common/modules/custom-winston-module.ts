@@ -14,7 +14,7 @@ const logFormat = printf(({ level, message, stack }) => {
 });
 
 // 로그 파일 저장
-const logDir = __dirname + "./../../logs";
+const logDir = __dirname + "../../../logs";
 const logRetentionPeriod = 30;
 
 if (!fs.existsSync(logDir)) {
