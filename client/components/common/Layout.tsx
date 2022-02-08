@@ -10,11 +10,19 @@ const Container = styled.div`
   flex-direction: column;
   row-gap: ${styles.space.level7}rem;
 
-  & > header {
+  & > header,
+  & > main > section {
     width: ${styles.maxWidth}rem;
     margin: 0 auto;
     padding: 0 ${styles.grid.gutter / 2}rem;
   }
+`;
+
+const Main = styled.main`
+    gap: 12rem;
+
+    display: flex;
+    flex-direction: column;
 `;
 
 interface Props extends HTMLAttributes<HTMLDivElement> {}
@@ -22,7 +30,7 @@ const Layout = ({ children }: Props) => {
   return (
     <Container>
       <Header />
-      {children}
+      <Main>{children}</Main>
     </Container>
   );
 };
