@@ -9,11 +9,21 @@ import { HttpExceptionFilter, SuccessInterceptor } from "@/common";
 import { AppModule } from "./app.module";
 
 class Application {
+  private PORT: string;
+  private corsOriginList: string[];
   private ADMIN_USER: string;
   private ADMIN_PASSWORD: string;
 
   constructor(private app: NestExpressApplication) {
     this.app = app;
+
+    this.PORT = process.env.PORT;
+    this.corsOriginList =
+      process.env.NODE_ENV === "development"
+        ? ["*"]
+        : process.env.CORS_ORIGIN_LIST.split(",").map((origin) =>
+            origin.trim()
+          );
 
     this.ADMIN_USER = process.env.ADMIN_USER;
     this.ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
@@ -47,6 +57,10 @@ class Application {
   }
 
   private async setUpGlobalMiddleware() {
+    this.app.enableCors({
+      origin: this.corsOriginList,
+      credentials: true,
+    });
     this.setUpBasicAuth();
     this.setUpOpenAPIMiddleware();
 
@@ -58,7 +72,7 @@ class Application {
   async bootstrap() {
     this.app.setGlobalPrefix(APP.GLOBAL_PREFIX);
     await this.setUpGlobalMiddleware();
-    await this.app.listen(process.env.PORT);
+    await this.app.listen(this.PORT);
   }
 }
 
