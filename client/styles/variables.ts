@@ -65,10 +65,10 @@ export const space = {
   level3: 1.2,
   level4: 1.6,
   level5: 2.4,
-  level6: 2.8,
-  level7: 3.2,
-  level8: 3.6,
-  level9: 4,
+  level6: 3.2,
+  level7: 4,
+  level8: 8,
+  level9: 12,
 };
 
 export const color = {
