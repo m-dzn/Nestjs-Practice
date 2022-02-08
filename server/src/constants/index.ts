@@ -1,4 +1,5 @@
 export * from "./messages";
+export * from "./api-docs";
 
 export const APP = {
   GLOBAL_PREFIX: "api",
