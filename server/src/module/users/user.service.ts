@@ -2,14 +2,13 @@ import { messages } from "@/constants";
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 
 import { JoinForm, UserSummary } from "./dto";
-import { User } from "./user.entity";
 import { UserRepository } from "./user.repository";
 
 @Injectable()
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async join({ email, name, password }: JoinForm): Promise<User> {
+  async join({ email, name, password }: JoinForm): Promise<UserSummary> {
     const exUser = await this.userRepository.findOne({ email });
 
     if (exUser) {
