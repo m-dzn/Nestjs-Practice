@@ -44,8 +44,12 @@ const LargeInput = ({ field, errors, style }: Props) => {
 
   const error = errors[name];
 
-  const validate = (value: any) =>
-    field.match && value === getValues()[field.match];
+  const validate = {
+    message: (value: any) =>
+      (field.match && value === getValues()[field.match.fieldName]) ||
+      field.match?.message ||
+      strings.validation.defaultMessage,
+  };
 
   const registerProps = field.match
     ? register(name, { ...validation, validate })
