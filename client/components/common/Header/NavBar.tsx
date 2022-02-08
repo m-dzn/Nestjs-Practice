@@ -45,7 +45,9 @@ const NavBar = ({ items }: NavBarProps) => {
     <StyledNav>
       <NavMenu>
         {items.map((item) => (
-          <NavItem path={item.path}>{item.children}</NavItem>
+          <NavItem key={item.path} path={item.path}>
+            {item.children}
+          </NavItem>
         ))}
       </NavMenu>
     </StyledNav>

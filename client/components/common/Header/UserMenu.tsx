@@ -53,8 +53,8 @@ interface Props {
 const UserMenu = ({ items }: Props) => {
   return (
     <Menu>
-      {items.map((item) => (
-        <UserMenuItem key={item.path} path={item.path}>
+      {items.map((item, index) => (
+        <UserMenuItem key={item.path || index} path={item.path}>
           {item.children}
         </UserMenuItem>
       ))}

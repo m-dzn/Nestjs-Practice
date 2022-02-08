@@ -8,6 +8,7 @@ import Logo from "../Logo";
 import NavBar from "./NavBar";
 import UserMenu from "./UserMenu";
 import { MdSearch, MdShoppingCart } from "react-icons/md";
+import { paths } from "@/constants";
 
 const HEADER_HEIGHT = 5.6;
 
@@ -21,11 +22,6 @@ const Container = styled.div`
   height: inherit;
   border-color: ${({ theme }) => theme.color.font};
   border-bottom: ${styles.border.level1}rem solid;
-`;
-
-const LogoBox = styled.div`
-  position: relative;
-  cursor: pointer;
 `;
 
 const navItems: NavMenuItem[] = [
@@ -63,11 +59,11 @@ const userMenuItems: NavMenuItem[] = [
     children: <MdShoppingCart />,
   },
   {
-    path: "/login",
+    path: paths.client.login,
     children: "로그인",
   },
   {
-    path: "/join",
+    path: paths.client.join,
     children: "회원가입",
   },
 ];
@@ -76,9 +72,7 @@ const Header = () => {
   return (
     <StyledHeader>
       <Container>
-        <LogoBox>
-          <Logo />
-        </LogoBox>
+        <Logo />
         <NavBar items={navItems} />
         <UserMenu items={userMenuItems} />
       </Container>
