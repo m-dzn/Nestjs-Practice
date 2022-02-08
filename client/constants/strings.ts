@@ -6,4 +6,7 @@ export default {
       title: "홈",
     },
   },
+  validation: {
+    defaultMessage: "잘못된 입력입니다.",
+  },
 };

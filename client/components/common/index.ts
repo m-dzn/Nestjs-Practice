@@ -1,4 +1,5 @@
 export * from "./button";
+export * from "./input";
 export * from "./Header";
 
 export { default as Layout } from "./Layout";
