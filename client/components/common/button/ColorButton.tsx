@@ -3,7 +3,8 @@ import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { ButtonHTMLAttributes, DetailedHTMLProps, memo } from "react";
 
-const DEFAULT_HEIGHT = 4;
+const DEFAULT_HEIGHT = 4.8;
+const DEFAULT_FONT_SIZE = styles.fontSize.normal;
 
 interface StyleProps {
   background?: string;
@@ -27,7 +28,7 @@ const StyledButton = styled.button<StyleProps>`
 
   height: ${DEFAULT_HEIGHT}rem;
 
-  font-size: ${styles.fontSize.h6}rem;
+  font-size: ${DEFAULT_FONT_SIZE}rem;
 
   cursor: pointer;
 
