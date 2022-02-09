@@ -1,8 +1,8 @@
-import { memo } from "react";
+import { FormEvent } from "react";
 import styled from "@emotion/styled";
-import { FormProvider, useForm } from "react-hook-form";
+import { FieldError, FormProvider, useForm } from "react-hook-form";
 
-import { AuthType, CheckBox, Field } from "@/interfaces";
+import { AnyForm, AuthType, CheckBox, Field, JoinForm } from "@/interfaces";
 import { strings } from "@/constants";
 import { ColorButton, LargeInput, SimpleCheckBox } from "@/components";
 import { styles } from "@/styles";
@@ -47,17 +47,32 @@ interface Props {
   type: AuthType;
   fields: Field[];
   checkBoxes: CheckBox[];
-  onSubmit: (form: object) => void;
+  onSubmit: (form: AnyForm) => void;
 }
 const AuthForm = ({ type, fields, checkBoxes, onSubmit }: Props) => {
-  const formMethods = useForm({ mode: "onTouched", criteriaMode: "all" });
+  const formMethods = useForm({
+    mode: "onTouched",
+  });
 
-  const { errors, isValid } = formMethods.formState;
+  const { errors } = formMethods.formState;
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    formMethods.handleSubmit(onSubmit)(e);
+
+    for (const field of [...fields, ...checkBoxes]) {
+      const error: FieldError = errors[field.name];
+      if (error) {
+        alert(error.message);
+        formMethods.setFocus(field.name);
+        break;
+      }
+    }
+  };
 
   return (
     <Section>
       <FormProvider {...formMethods}>
-        <form onSubmit={formMethods.handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit}>
           <Wrapper>
             <Title>{type}</Title>
             <FormBody>
@@ -69,9 +84,7 @@ const AuthForm = ({ type, fields, checkBoxes, onSubmit }: Props) => {
                   <SimpleCheckBox key={checkBox.name} checkBox={checkBox} />
                 ))}
               </div>
-              <ColorButton type="submit" disabled={!isValid}>
-                {strings.seo[type].title}
-              </ColorButton>
+              <ColorButton type="submit">{strings.seo[type].title}</ColorButton>
             </FormBody>
             <OAuthButtonContainer type={type} />
           </Wrapper>
@@ -81,4 +94,4 @@ const AuthForm = ({ type, fields, checkBoxes, onSubmit }: Props) => {
   );
 };
 
-export default memo(AuthForm);
+export default AuthForm;

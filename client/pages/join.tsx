@@ -1,6 +1,8 @@
 import { AuthForm, Seo } from "@/components";
-import { fields, strings } from "@/constants";
-import { Field } from "@/interfaces";
+import { fields, paths, strings } from "@/constants";
+import { AnyForm, Field } from "@/interfaces";
+import { userAPI } from "@/lib";
+import { useRouter } from "next/router";
 
 const loginFields: Field[] = [
   fields.email,
@@ -27,8 +29,22 @@ const checkBoxes = [
 ];
 
 const Join = () => {
-  const handleSubmit = (form: object) => {
-    console.log(form);
+  const router = useRouter();
+
+  const handleSubmit = async (form: AnyForm) => {
+    const response = await userAPI.join({
+      email: form.email,
+      name: form.name,
+      password: form.password,
+    });
+
+    if (response.message) {
+      alert(response.message);
+    }
+
+    if (response.success) {
+      router.push(paths.client.home);
+    }
   };
 
   return (
