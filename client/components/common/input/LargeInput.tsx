@@ -1,7 +1,7 @@
 import { HTMLAttributes, memo } from "react";
 import styled from "@emotion/styled";
 import { css } from "@emotion/react";
-import { FieldErrors, useFormContext } from "react-hook-form";
+import { FieldError, FieldErrors, useFormContext } from "react-hook-form";
 
 import { strings } from "@/constants";
 import { Field } from "@/interfaces";
@@ -42,7 +42,7 @@ const LargeInput = ({ field, errors, style }: Props) => {
   const { name, type, placeholder, validation } = field;
   const { register, getValues } = useFormContext();
 
-  const error = errors[name];
+  const error: FieldError = errors[name];
 
   const validate = {
     message: (value: any) =>
