@@ -61,17 +61,10 @@ export default {
     placeholder: "비밀번호 확인",
     validation: {
       required: "비밀번호를 다시 한 번 입력해주세요.",
-      minLength: {
-        value: PASSWORD_MIN_LENGTH,
-        message: `비밀번호는 최소 ${PASSWORD_MIN_LENGTH}자 이상이어야 합니다.`,
-      },
-      maxLength: {
-        value: PASSWORD_MAX_LENGTH,
-        message: `비밀번호는 ${PASSWORD_MAX_LENGTH}자 이하여야 합니다.`,
-      },
     },
     match: {
       fieldName: "password",
+      message: "비밀번호가 일치하지 않습니다.",
     },
   },
 };
