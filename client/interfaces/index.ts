@@ -1,6 +1,13 @@
 import { ReactNode } from "react";
 import { RegisterOptions } from "react-hook-form";
 
+export interface ApiResponse {
+  success: boolean;
+  status: number;
+  data?: any;
+  message?: string;
+}
+
 export interface NavMenuItem {
   path?: string;
   children: ReactNode;
@@ -34,3 +41,13 @@ export interface SNSProvider {
 }
 
 export type AuthType = "login" | "join";
+
+export interface AnyForm {
+  [x: string]: any;
+}
+
+export interface JoinForm {
+  email: string;
+  name: string;
+  password: string;
+}

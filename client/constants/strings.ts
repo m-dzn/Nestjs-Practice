@@ -38,4 +38,13 @@ export default {
       },
     },
   },
+  api: {
+    users: {
+      join: {
+        success: "회원가입이 완료되었습니다!",
+        emailUnavailable: "사용할 수 없는 이메일입니다.",
+        failure: "회원가입 중 오류가 발생했습니다. 다시 시도해주세요.",
+      },
+    },
+  },
 };
