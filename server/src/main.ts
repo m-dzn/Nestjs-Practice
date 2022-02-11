@@ -8,6 +8,7 @@ import * as expressBasicAuth from "express-basic-auth";
 import { APP } from "@/constants";
 import { HttpExceptionFilter, SuccessInterceptor } from "@/common";
 import { AppModule } from "./app.module";
+import { ValidationPipe } from "@nestjs/common";
 
 class Application {
   private PORT: string;
@@ -66,6 +67,7 @@ class Application {
     this.setUpBasicAuth();
     this.setUpOpenAPIMiddleware();
 
+    this.app.useGlobalPipes(new ValidationPipe({ transform: true }));
     this.app.useGlobalInterceptors(new SuccessInterceptor());
     this.app.useGlobalFilters(new HttpExceptionFilter());
     this.app.useLogger(this.app.get(WINSTON_MODULE_NEST_PROVIDER));
