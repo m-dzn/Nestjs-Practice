@@ -3,8 +3,9 @@ import {
   Catch,
   ExceptionFilter,
   HttpException,
+  HttpStatus,
 } from "@nestjs/common";
-import { Response } from "express";
+import { response, Response } from "express";
 import { ResponseEntity, ErrorResponse } from "../interfaces";
 
 @Catch(HttpException)
@@ -15,15 +16,25 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
     const error = exception.getResponse() as string | ErrorResponse;
 
-    const responseEntity: ResponseEntity = {
+    let responseEntity: ResponseEntity;
+    const commonProps = {
       success: false,
-      status,
+      code: status,
     };
 
-    if (typeof error === "string") {
-      responseEntity.message = error;
+    if (
+      typeof error !== "string" &&
+      error.statusCode === HttpStatus.BAD_REQUEST
+    ) {
+      responseEntity = {
+        ...commonProps,
+        data: error.message,
+      };
     } else {
-      Object.assign(responseEntity, error);
+      responseEntity = {
+        ...commonProps,
+        data: error,
+      };
     }
 
     res.status(status).json(responseEntity);

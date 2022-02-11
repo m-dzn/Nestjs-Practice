@@ -15,7 +15,7 @@ export class SuccessInterceptor implements NestInterceptor {
       map(
         (data): ResponseEntity => ({
           success: true,
-          status,
+          code: status,
           data,
         })
       )

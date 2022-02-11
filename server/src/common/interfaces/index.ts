@@ -1,10 +1,11 @@
 export interface ErrorResponse {
-  error?: string;
-  message?: string | string[];
+  error: string;
+  statusCode: number;
+  message: string | string[];
 }
 
-export interface ResponseEntity extends ErrorResponse {
+export interface ResponseEntity {
   success: boolean;
-  status: number;
+  code: number;
   data?: any;
 }
