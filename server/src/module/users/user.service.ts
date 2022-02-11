@@ -35,4 +35,10 @@ export class UserService {
       );
     }
   }
+
+  async setRefreshToken(userId: number, refreshToken: string) {
+    await this.userRepository.update(userId, {
+      refreshToken,
+    });
+  }
 }
