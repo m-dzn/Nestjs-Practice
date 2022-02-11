@@ -2,6 +2,7 @@ import { messages } from "@/constants";
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 
 import { JoinForm, UserSummary } from "./dto";
+import { User } from "./user.entity";
 import { UserRepository } from "./user.repository";
 
 @Injectable()
@@ -34,6 +35,10 @@ export class UserService {
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
+  }
+
+  async getByEmail(email: string): Promise<User> {
+    return this.userRepository.findOne({ email });
   }
 
   async setRefreshToken(userId: number, refreshToken: string) {

@@ -1,9 +1,10 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 
-import { APP } from "@/constants";
+import { APP, messages } from "@/constants";
 import { JoinForm, User, UserService, UserSummary } from "@/module/users";
+import { JWT } from "./auth.constant";
 
 @Injectable()
 export class AuthService {
@@ -15,6 +16,29 @@ export class AuthService {
 
   async join(joinForm: JoinForm): Promise<UserSummary> {
     return this.userService.join(joinForm);
+  }
+
+  async validateLocalUser(email: string, password: string): Promise<User> {
+    const user = await this.userService.getByEmail(email);
+
+    if (!user) {
+      throw new HttpException(
+        messages.user.badLoginRequest,
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    const isPasswordValid = await user.checkPassword(password);
+    delete user.password;
+
+    if (!isPasswordValid) {
+      throw new HttpException(
+        messages.user.badLoginRequest,
+        HttpStatus.UNAUTHORIZED
+      );
+    }
+
+    return user;
   }
 
   getAccessToken(user: User) {
@@ -31,7 +55,7 @@ export class AuthService {
       { id: user.id },
       {
         secret: this.config.get(APP.ENV.REFRESH_TOKEN_SECRET),
-        expiresIn: this.config.get(APP.ENV.REFRESH_TOKEN_EXPIRES_IN),
+        expiresIn: JWT.REFRESH_TOKEN_EXPIRES_IN,
       }
     );
 

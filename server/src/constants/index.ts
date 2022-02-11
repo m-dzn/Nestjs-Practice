@@ -10,9 +10,12 @@ export const APP = {
     TITLE: "VIA - API",
     DESCRIPTION: "VIA Fashion E-Commerce API Docs",
   },
+  COOKIE: {
+    REFRESH_TOKEN: "refresh_token",
+  },
   ENV: {
     ACCESS_TOKEN_SECRET: "ACCESS_TOKEN_SECRET",
     REFRESH_TOKEN_SECRET: "REFRESH_TOKEN_SECRET",
-    REFRESH_TOKEN_EXPIRES_IN: "14d",
+    COOKIE_SECRET: "COOKIE_SECRET",
   },
 };

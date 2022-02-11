@@ -22,5 +22,23 @@ export const apiDocs = {
         },
       },
     },
+
+    login: {
+      operation: {
+        summary: "로그인",
+        description:
+          "회원의 이메일과 비밀번호를 입력받아 인증 과정을 진행한 후 JWT를 발행합니다.",
+      },
+      response: {
+        ok: {
+          status: HttpStatus.OK,
+          description: "로그인 성공",
+        },
+        internalServerError: {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          description: "알 수 없는 서버 오류",
+        },
+      },
+    },
   },
 };

@@ -59,7 +59,6 @@ export class User extends DateAudit {
   @Column({
     length: USER.PASSWORD.MAX_LENGTH,
     nullable: true,
-    select: false,
   })
   password?: string;
 
@@ -96,10 +95,20 @@ export class User extends DateAudit {
       if (this.dbPassword !== this.password) {
         try {
           this.password = await bcrypt.hash(this.password, AUTH.salt);
+
+          console.log("호출", this.dbPassword, this.password);
         } catch (err) {
           throw new InternalServerErrorException();
         }
       }
+    }
+  }
+
+  async checkPassword?(rawPassword: string): Promise<boolean> {
+    try {
+      return bcrypt.compare(rawPassword, this.password);
+    } catch (err) {
+      throw new InternalServerErrorException();
     }
   }
 }
