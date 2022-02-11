@@ -3,6 +3,7 @@ import { utilities, WinstonModule } from "nest-winston";
 import "winston-daily-rotate-file";
 import * as dayjs from "dayjs";
 import * as fs from "fs";
+import { APP } from "@/constants";
 
 const { combine, ms, printf } = format;
 
@@ -22,7 +23,7 @@ if (!fs.existsSync(logDir)) {
 }
 
 const consoleTransport =
-  process.env.NODE_ENV !== "production"
+  process.env[APP.ENV.NODE_ENV] !== APP.ENV.NODE_ENV_PRODUCTION
     ? new transports.Console({ format: combine(utilities.format.nestLike()) })
     : null;
 

@@ -20,7 +20,7 @@ class Application {
 
     this.PORT = process.env.PORT;
     this.corsOriginList =
-      process.env.NODE_ENV === "development"
+      process.env[APP.ENV.NODE_ENV] === APP.ENV.NODE_ENV_DEVELOPMENT
         ? ["*"]
         : process.env.CORS_ORIGIN_LIST.split(",").map((origin) =>
             origin.trim()
