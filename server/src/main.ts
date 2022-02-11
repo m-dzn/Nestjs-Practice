@@ -1,6 +1,7 @@
 import { NestFactory } from "@nestjs/core";
 import { WINSTON_MODULE_NEST_PROVIDER } from "nest-winston";
 import { NestExpressApplication } from "@nestjs/platform-express";
+import * as cookieParser from "cookie-parser";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import * as expressBasicAuth from "express-basic-auth";
 
@@ -61,6 +62,7 @@ class Application {
       origin: this.corsOriginList,
       credentials: true,
     });
+    this.app.use(cookieParser(process.env[APP.ENV.COOKIE_SECRET]));
     this.setUpBasicAuth();
     this.setUpOpenAPIMiddleware();
 
