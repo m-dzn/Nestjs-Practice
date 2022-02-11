@@ -1,4 +1,5 @@
 import {
+  AfterLoad,
   BeforeInsert,
   BeforeUpdate,
   Column,
@@ -80,14 +81,24 @@ export class User extends DateAudit {
   })
   refreshToken?: string;
 
+  // DB에서 가져온 암호화된 비밀번호
+  private dbPassword?: string;
+
+  @AfterLoad()
+  private loadDbPassword?(): void {
+    this.dbPassword = this.password;
+  }
+
   @BeforeInsert()
   @BeforeUpdate()
   async hashPassword?(): Promise<void> {
     if (this.password) {
-      try {
-        this.password = await bcrypt.hash(this.password, AUTH.salt);
-      } catch (err) {
-        throw new InternalServerErrorException();
+      if (this.dbPassword !== this.password) {
+        try {
+          this.password = await bcrypt.hash(this.password, AUTH.salt);
+        } catch (err) {
+          throw new InternalServerErrorException();
+        }
       }
     }
   }
