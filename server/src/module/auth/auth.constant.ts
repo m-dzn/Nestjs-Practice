@@ -13,7 +13,7 @@ export const refreshTokenOptions: CookieOptions = {
   domain: "localhost",
   path: "/",
   httpOnly: true,
-  maxAge: JWT.REFRESH_TOKEN_EXPIRES_IN * 1000,
+  maxAge: JWT.REFRESH_TOKEN_EXPIRES_IN,
   signed: true,
   secure: false,
 };
