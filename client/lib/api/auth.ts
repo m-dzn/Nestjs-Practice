@@ -1,6 +1,6 @@
 import { paths, strings } from "@/constants";
 import { ApiResponse, JoinForm } from "@/interfaces";
-import { axios } from "./";
+import { axios } from ".";
 
 export const userAPI = {
   join: async (joinForm: JoinForm): Promise<ApiResponse> => {

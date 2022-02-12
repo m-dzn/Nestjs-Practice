@@ -1,4 +1,5 @@
 import { NestFactory } from "@nestjs/core";
+import { ValidationPipe } from "@nestjs/common";
 import { WINSTON_MODULE_NEST_PROVIDER } from "nest-winston";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import * as cookieParser from "cookie-parser";
@@ -8,7 +9,6 @@ import * as expressBasicAuth from "express-basic-auth";
 import { APP } from "@/constants";
 import { HttpExceptionFilter, SuccessInterceptor } from "@/common";
 import { AppModule } from "./app.module";
-import { ValidationPipe } from "@nestjs/common";
 
 class Application {
   private PORT: string;

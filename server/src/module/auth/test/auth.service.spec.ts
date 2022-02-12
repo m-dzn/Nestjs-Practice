@@ -1,26 +1,23 @@
 import { Test } from "@nestjs/testing";
-import { User, UserService } from "@/module/users";
-import { AuthService } from "../auth.service";
-import { JwtService } from "@nestjs/jwt";
-import { LoginForm } from "@/module/auth/dto";
-import { userStub } from "@/module/users/test/stubs";
+import { HttpStatus } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { HttpException, HttpStatus } from "@nestjs/common";
-import { messages } from "@/constants";
+import { getRepositoryToken } from "@nestjs/typeorm";
+import { JwtService } from "@nestjs/jwt";
 
-const mockUserService = () => ({
-  getByEmail: jest.fn(),
-});
+import { User, UserSummary } from "@/module/users";
 
-const mockJwtService = () => ({
-  sign: jest.fn(() => "signed-token"),
-  verify: jest.fn(),
-});
+import { JoinForm } from "../dto";
+import { AuthService } from "../auth.service";
+import { exUserStub, newUserStub } from "./stubs";
+import { MockUserRepository, MockJwtService } from "./mocks";
 
 describe("AuthService", () => {
   let authService: AuthService;
-  let userService;
-  let jwtService;
+  let userRepository: MockUserRepository;
+  let jwtService: MockJwtService;
+
+  let exUser: User;
+  let newUser: User;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -28,74 +25,94 @@ describe("AuthService", () => {
         AuthService,
         ConfigService,
         {
-          provide: UserService,
-          useValue: mockUserService(),
+          provide: getRepositoryToken(User),
+          useClass: MockUserRepository,
         },
         {
           provide: JwtService,
-          useValue: mockJwtService(),
+          useValue: MockJwtService,
         },
       ],
     }).compile();
 
     authService = module.get(AuthService);
-    userService = module.get(UserService);
+    userRepository = module.get(getRepositoryToken(User));
     jwtService = module.get(JwtService);
+
+    exUser = exUserStub();
+    newUser = newUserStub();
 
     jest.clearAllMocks();
   });
 
-  describe("이메일 회원 검증", () => {
-    const loginForm: LoginForm = {
-      email: "test@example.com",
-      password: "1111",
-    };
+  describe("join()", () => {
+    let joinForm: JoinForm;
 
-    test("비밀번호가 유효하면 User 정보를 반환합니다.", async () => {
-      const mockedUser = {
-        id: 1,
-        ...loginForm,
-        checkPassword: jest.fn(() => Promise.resolve(true)),
+    beforeEach(() => {
+      joinForm = {
+        email: newUser.email,
+        name: newUser.name,
+        password: newUser.password,
       };
-      userService.getByEmail.mockResolvedValue(mockedUser);
-
-      const result = await authService.validateLocalUser(
-        mockedUser.email,
-        mockedUser.password
-      );
-
-      expect(result.id).toEqual(mockedUser.id);
     });
 
-    test("회원이 존재하지 않으면 BAD REQUEST 예외를 던집니다.", async () => {
-      userService.getByEmail.mockResolvedValue(null);
+    test("가입 성공 시 DTO(UserSummary)를 반환합니다.", async () => {
+      const result = await authService.join(joinForm);
 
-      const exception = new HttpException(
-        messages.user.badLoginRequest,
-        HttpStatus.BAD_REQUEST
+      const userSummary = new UserSummary(exUserStub());
+      expect(result).toStrictEqual(userSummary);
+    });
+
+    test("TypeORM 예외 시 INTERNAL SERVER ERROR를 던집니다.", async () => {
+      userRepository.save.mockRejectedValue(new Error());
+
+      try {
+        await authService.join(joinForm);
+      } catch (err) {
+        expect(err.status).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    });
+
+    test("이메일 중복 시 BAD REQUEST 예외를 던집니다.", async () => {
+      const joinFormWithDuplicateEmail: JoinForm = {
+        email: exUser.email,
+        name: exUser.name,
+        password: exUser.password,
+      };
+
+      expect(authService.join(joinForm)).resolves;
+      try {
+        await authService.join(joinFormWithDuplicateEmail);
+      } catch (err) {
+        expect(err.status).toBe(HttpStatus.BAD_REQUEST);
+      }
+    });
+  });
+
+  describe("validateLocalUser()", () => {
+    test("비밀번호가 유효하면 User 정보를 반환합니다.", async () => {
+      const result = await authService.validateLocalUser(
+        exUser.email,
+        exUser.password
       );
 
-      await expect(
-        authService.validateLocalUser(loginForm.email, loginForm.password)
-      ).rejects.toThrow(exception);
+      expect(result.id).toEqual(exUserStub().id);
+    });
+
+    test("회원을 찾을 수 없으면 BAD REQUEST 예외를 던집니다.", async () => {
+      try {
+        await authService.validateLocalUser(newUser.email, newUser.password);
+      } catch (err) {
+        expect(err.status).toBe(HttpStatus.BAD_REQUEST);
+      }
     });
 
     test("비밀번호가 일치하지 않으면 BAD REQUEST 예외를 던집니다.", async () => {
-      const mockedUser = {
-        id: 1,
-        ...loginForm,
-        checkPassword: jest.fn(() => Promise.resolve(false)),
-      };
-      userService.getByEmail.mockResolvedValue(mockedUser);
-
-      const exception = new HttpException(
-        messages.user.badLoginRequest,
-        HttpStatus.BAD_REQUEST
-      );
-
-      await expect(
-        authService.validateLocalUser(loginForm.email, loginForm.password)
-      ).rejects.toThrow(exception);
+      try {
+        await authService.validateLocalUser(exUser.email, "");
+      } catch (err) {
+        expect(err.status).toBe(HttpStatus.BAD_REQUEST);
+      }
     });
   });
 });

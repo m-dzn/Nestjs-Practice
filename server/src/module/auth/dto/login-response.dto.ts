@@ -1,5 +1,5 @@
-import { UserSummary } from "@/module/users";
 import { ApiProperty } from "@nestjs/swagger";
+import { UserSummary } from "@/module/users";
 
 export class LoginResponse {
   @ApiProperty({

@@ -1,25 +1,54 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
 import { JwtService } from "@nestjs/jwt";
 
 import { APP, messages } from "@/constants";
-import { JoinForm, User, UserService, UserSummary } from "@/module/users";
+import { User, UserSummary } from "@/module/users";
+
 import { JWT } from "./auth.constant";
+import { JoinForm } from "./dto";
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UserService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
     private readonly config: ConfigService
   ) {}
 
-  async join(joinForm: JoinForm): Promise<UserSummary> {
-    return this.userService.join(joinForm);
+  async join({ email, name, password }: JoinForm): Promise<UserSummary> {
+    const exUser = await this.userRepository.findOne({ email });
+
+    if (exUser) {
+      throw new HttpException(
+        messages.user.duplicateEmail,
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    try {
+      const newUser = await this.userRepository.save(
+        this.userRepository.create({
+          email,
+          name,
+          password,
+        })
+      );
+
+      return new UserSummary(newUser);
+    } catch (err) {
+      throw new HttpException(
+        messages.user.joinError,
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   async validateLocalUser(email: string, password: string): Promise<User> {
-    const user = await this.userService.getByEmail(email);
+    const user = await this.userRepository.findOne({ email });
 
     if (!user) {
       throw new HttpException(
@@ -34,7 +63,7 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new HttpException(
         messages.user.badLoginRequest,
-        HttpStatus.UNAUTHORIZED
+        HttpStatus.BAD_REQUEST
       );
     }
 
@@ -59,7 +88,9 @@ export class AuthService {
       }
     );
 
-    await this.userService.setRefreshToken(user.id, refreshToken);
+    await this.userRepository.update(user.id, {
+      refreshToken,
+    });
 
     return refreshToken;
   }

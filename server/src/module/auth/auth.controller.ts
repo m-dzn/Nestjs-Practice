@@ -10,13 +10,13 @@ import { ApiOperation, ApiResponse, ApiTags, ApiBody } from "@nestjs/swagger";
 import { Response } from "express";
 
 import { APP } from "@/constants";
-import { JoinForm, User, UserSummary } from "@/module/users";
+import { User, UserSummary } from "@/module/users";
 
 import { CurrentUser } from "./decorators";
 import { LocalAuthGuard } from "./guards";
 import { AuthService } from "./auth.service";
 import { refreshTokenOptions } from "./auth.constant";
-import { LoginForm, LoginResponse } from "./dto";
+import { JoinForm, LoginForm, LoginResponse } from "./dto";
 
 @ApiTags("인증/인가 API")
 @Controller("auth")

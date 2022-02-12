@@ -1,5 +1,5 @@
 import { PickType } from "@nestjs/swagger";
-import { User } from "../user.entity";
+import { User } from "@/module/users";
 
 export class JoinForm extends PickType(User, [
   "email",

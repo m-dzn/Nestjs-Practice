@@ -2,7 +2,7 @@ const getApiPath = (path: string) => `/api${path}`;
 
 export default {
   api: {
-    join: getApiPath("/users"),
+    join: getApiPath("/auth/join"),
   },
   client: {
     home: "/",
