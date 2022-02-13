@@ -66,8 +66,10 @@ export class AuthController {
     @CurrentUser() user: User,
     @Res({ passthrough: true }) res: Response
   ): Promise<LoginResponse> {
-    const accessToken = this.authService.getAccessToken(user);
-    const refreshToken = await this.authService.getRefreshToken(user);
+    const accessToken = this.authService.getAccessToken({ id: user.id });
+    const refreshToken = await this.authService.getRefreshToken({
+      id: user.id,
+    });
 
     res.cookie(APP.COOKIE.REFRESH_TOKEN, refreshToken, refreshTokenOptions);
 

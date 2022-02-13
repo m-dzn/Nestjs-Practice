@@ -9,6 +9,7 @@ import { User, UserSummary } from "@/module/users";
 
 import { JWT } from "./auth.constant";
 import { JoinForm } from "./dto";
+import { JWTPayload } from "./interfaces";
 
 @Injectable()
 export class AuthService {
@@ -70,25 +71,32 @@ export class AuthService {
     return user;
   }
 
-  getAccessToken(user: User) {
-    return this.jwtService.sign(
-      { id: user.id },
-      {
-        secret: this.config.get(APP.ENV.ACCESS_TOKEN_SECRET),
-      }
-    );
+  async validateJwtUser({ id }: JWTPayload): Promise<User> {
+    const user = await this.userRepository.findOne({ id });
+
+    if (!user) {
+      throw new HttpException(
+        messages.user.badLoginRequest,
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    return user;
   }
 
-  async getRefreshToken(user: User) {
-    const refreshToken = this.jwtService.sign(
-      { id: user.id },
-      {
-        secret: this.config.get(APP.ENV.REFRESH_TOKEN_SECRET),
-        expiresIn: JWT.REFRESH_TOKEN_EXPIRES_IN,
-      }
-    );
+  getAccessToken(payload: JWTPayload) {
+    return this.jwtService.sign(payload, {
+      secret: this.config.get(APP.ENV.ACCESS_TOKEN_SECRET),
+    });
+  }
 
-    await this.userRepository.update(user.id, {
+  async getRefreshToken(payload: JWTPayload) {
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: this.config.get(APP.ENV.REFRESH_TOKEN_SECRET),
+      expiresIn: JWT.REFRESH_TOKEN_EXPIRES_IN,
+    });
+
+    await this.userRepository.update(payload.id, {
       refreshToken,
     });
 
