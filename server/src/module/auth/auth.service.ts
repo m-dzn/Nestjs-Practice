@@ -4,7 +4,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { JwtService } from "@nestjs/jwt";
 
-import { APP, messages } from "@/constants";
+import { messages } from "@/constants";
 import { User, UserSummary } from "@/module/users";
 
 import { JWT } from "./auth.constant";
@@ -86,13 +86,13 @@ export class AuthService {
 
   getAccessToken(payload: JWTPayload) {
     return this.jwtService.sign(payload, {
-      secret: this.config.get(APP.ENV.ACCESS_TOKEN_SECRET),
+      secret: this.config.get("ACCESS_TOKEN_SECRET"),
     });
   }
 
   async getRefreshToken(payload: JWTPayload) {
     const refreshToken = this.jwtService.sign(payload, {
-      secret: this.config.get(APP.ENV.REFRESH_TOKEN_SECRET),
+      secret: this.config.get("REFRESH_TOKEN_SECRET"),
       expiresIn: JWT.REFRESH_TOKEN_EXPIRES_IN,
     });
 

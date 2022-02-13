@@ -11,9 +11,7 @@ import { APP } from "@/constants";
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `.env.${
-        process.env[APP.ENV.NODE_ENV] || APP.ENV.NODE_ENV_DEVELOPMENT
-      }`,
+      envFilePath: `.env.${process.env.NODE_ENV || APP.NODE_ENV.DEVELOPMENT}`,
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

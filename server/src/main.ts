@@ -21,7 +21,7 @@ class Application {
 
     this.PORT = process.env.PORT;
     this.corsOriginList =
-      process.env[APP.ENV.NODE_ENV] === APP.ENV.NODE_ENV_DEVELOPMENT
+      process.env.NODE_ENV === APP.NODE_ENV.DEVELOPMENT
         ? ["*"]
         : process.env.CORS_ORIGIN_LIST.split(",").map((origin) =>
             origin.trim()
@@ -63,7 +63,7 @@ class Application {
       origin: this.corsOriginList,
       credentials: true,
     });
-    this.app.use(cookieParser(process.env[APP.ENV.COOKIE_SECRET]));
+    this.app.use(cookieParser(process.env.COOKIE_SECRET));
     this.setUpBasicAuth();
     this.setUpOpenAPIMiddleware();
 
