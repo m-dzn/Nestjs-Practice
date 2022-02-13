@@ -3,6 +3,7 @@ import { CookieOptions } from "express";
 export const STRATEGY = {
   LOCAL: "local",
   JWT: "jwt",
+  KAKAO: "kakao",
 };
 
 export const JWT = {

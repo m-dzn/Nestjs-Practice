@@ -1,18 +1,8 @@
-import {
-  AfterLoad,
-  BeforeInsert,
-  BeforeUpdate,
-  Column,
-  Entity,
-  Index,
-  PrimaryGeneratedColumn,
-} from "typeorm";
-import { InternalServerErrorException } from "@nestjs/common";
+import { Column, Entity, Index, PrimaryGeneratedColumn } from "typeorm";
 import { ApiProperty } from "@nestjs/swagger";
-import * as bcrypt from "bcryptjs";
 
 import { DateAudit } from "@/common";
-import { USER, UserRole, AUTH } from "./user.constant";
+import { USER, UserRole, SNSProvider } from "./user.constant";
 import { IsEmail, IsNotEmpty } from "class-validator";
 import { messages } from "@/constants";
 
@@ -80,35 +70,16 @@ export class User extends DateAudit {
   })
   refreshToken?: string;
 
-  // DB에서 가져온 암호화된 비밀번호
-  private dbPassword?: string;
+  @Column({
+    type: "enum",
+    enum: SNSProvider,
+    default: SNSProvider.LOCAL,
+  })
+  provider?: SNSProvider;
 
-  @AfterLoad()
-  private loadDbPassword?(): void {
-    this.dbPassword = this.password;
-  }
-
-  @BeforeInsert()
-  @BeforeUpdate()
-  async hashPassword?(): Promise<void> {
-    if (this.password) {
-      if (this.dbPassword !== this.password) {
-        try {
-          this.password = await bcrypt.hash(this.password, AUTH.salt);
-
-          console.log("호출", this.dbPassword, this.password);
-        } catch (err) {
-          throw new InternalServerErrorException();
-        }
-      }
-    }
-  }
-
-  async checkPassword?(rawPassword: string): Promise<boolean> {
-    try {
-      return bcrypt.compare(rawPassword, this.password);
-    } catch (err) {
-      throw new InternalServerErrorException();
-    }
-  }
+  @Column({
+    length: USER.SNS_ID.MAX_LENGTH,
+    nullable: true,
+  })
+  snsId?: string;
 }

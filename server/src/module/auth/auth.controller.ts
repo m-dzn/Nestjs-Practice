@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpStatus,
   Post,
   Res,
@@ -13,15 +14,19 @@ import { APP } from "@/constants";
 import { User, UserSummary } from "@/module/users";
 
 import { CurrentUser } from "./decorators";
-import { LocalAuthGuard } from "./guards";
+import { LocalAuthGuard, KakaoAuthGuard } from "./guards";
 import { AuthService } from "./auth.service";
 import { refreshTokenOptions } from "./auth.constant";
 import { JoinForm, LoginForm, LoginResponse } from "./dto";
+import { ConfigService } from "@nestjs/config";
 
 @ApiTags("인증/인가 API")
 @Controller("auth")
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly config: ConfigService,
+    private readonly authService: AuthService
+  ) {}
 
   @ApiOperation({
     summary: "회원가입",
@@ -66,17 +71,42 @@ export class AuthController {
     @CurrentUser() user: User,
     @Res({ passthrough: true }) res: Response
   ): Promise<LoginResponse> {
+    this.setRefreshTokenCookie(user, res);
+
+    return this.getLoginResponse(user);
+  }
+
+  @Get("kakao")
+  @UseGuards(KakaoAuthGuard)
+  kakao() {
+    // Passport : 카카오 아이디 로그인 서비스로 리다이렉트
+  }
+
+  @Get("kakao/oauth")
+  @UseGuards(KakaoAuthGuard)
+  async kakaoCallback(
+    @CurrentUser() user: User,
+    @Res({ passthrough: true }) res: Response
+  ) {
     const accessToken = this.authService.getAccessToken({ id: user.id });
+    this.setRefreshTokenCookie(user, res);
+
+    res.redirect(
+      `${this.config.get("CLIENT_BASE_URL")}/oauth?token=${accessToken}`
+    );
+  }
+
+  private async setRefreshTokenCookie(user: User, res: Response) {
     const refreshToken = await this.authService.getRefreshToken({
       id: user.id,
     });
 
     res.cookie(APP.COOKIE.REFRESH_TOKEN, refreshToken, refreshTokenOptions);
+  }
 
-    const userSummary: UserSummary = new UserSummary(user);
-    return {
-      user: userSummary,
-      accessToken,
-    };
+  private getLoginResponse(user: User): LoginResponse {
+    const accessToken = this.authService.getAccessToken({ id: user.id });
+
+    return { accessToken };
   }
 }

@@ -8,6 +8,13 @@ export const USER = {
   PASSWORD: {
     MAX_LENGTH: 255,
   },
+  SNS_ID: {
+    MAX_LENGTH: 30,
+  },
+};
+
+export const AUTH = {
+  salt: 10,
 };
 
 export enum UserRole {
@@ -15,6 +22,7 @@ export enum UserRole {
   ADMIN = "ADMIN",
 }
 
-export const AUTH = {
-  salt: 10,
-};
+export enum SNSProvider {
+  LOCAL = "LOCAL",
+  KAKAO = "KAKAO",
+}

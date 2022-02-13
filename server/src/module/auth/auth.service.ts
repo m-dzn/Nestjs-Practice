@@ -3,12 +3,13 @@ import { ConfigService } from "@nestjs/config";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { JwtService } from "@nestjs/jwt";
+import * as bcrypt from "bcryptjs";
 
 import { messages } from "@/constants";
-import { User, UserSummary } from "@/module/users";
+import { AUTH, SNSProvider, User, UserSummary } from "@/module/users";
 
 import { JWT } from "./auth.constant";
-import { JoinForm } from "./dto";
+import { JoinForm, OAuthRequest } from "./dto";
 import { JWTPayload } from "./interfaces";
 
 @Injectable()
@@ -35,7 +36,7 @@ export class AuthService {
         this.userRepository.create({
           email,
           name,
-          password,
+          password: await bcrypt.hash(password, AUTH.salt),
         })
       );
 
@@ -58,7 +59,7 @@ export class AuthService {
       );
     }
 
-    const isPasswordValid = await user.checkPassword(password);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     delete user.password;
 
     if (!isPasswordValid) {
@@ -82,6 +83,30 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  async validateOAuthUser(
+    email: string,
+    provider: SNSProvider,
+    snsId: string
+  ): Promise<User> {
+    const user = await this.userRepository.findOne({ email });
+
+    if (!user) return null;
+
+    // SNS ID까지 비교하는 것이 리소스 낭비가 될지 고민해보기
+    if (user.provider !== provider.toUpperCase() || user.snsId != snsId) {
+      throw new HttpException(
+        messages.user.linkedAnotherSNS,
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    return user;
+  }
+
+  async oauthJoin(oauthJoinForm: OAuthRequest): Promise<User> {
+    return this.userRepository.save(oauthJoinForm);
   }
 
   getAccessToken(payload: JWTPayload) {
