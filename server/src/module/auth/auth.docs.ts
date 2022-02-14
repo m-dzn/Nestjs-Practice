@@ -1,5 +1,12 @@
-import { applyDecorators, HttpStatus } from "@nestjs/common";
-import { ApiBody, ApiOperation, ApiResponse } from "@nestjs/swagger";
+import { applyDecorators } from "@nestjs/common";
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiOkResponse,
+  ApiOperation,
+} from "@nestjs/swagger";
 
 import { SwaggerMethodDoc } from "./interfaces";
 import { JoinForm, LoginForm, LoginResponse } from "./dto";
@@ -12,19 +19,9 @@ export const Docs: SwaggerMethodDoc<AuthController> = {
         summary,
         description: "회원가입 양식을 받아 신규 회원으로 등록합니다.",
       }),
-      ApiResponse({
-        status: HttpStatus.CREATED,
-        description: "회원가입 성공",
-        type: JoinForm,
-      }),
-      ApiResponse({
-        status: HttpStatus.BAD_REQUEST,
-        description: "잘못된 인증 정보 입력",
-      }),
-      ApiResponse({
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-        description: "알 수 없는 서버 오류",
-      })
+      ApiCreatedResponse({ description: "회원가입 성공", type: JoinForm }),
+      ApiBadRequestResponse({ description: "잘못된 인증 정보 입력" }),
+      ApiInternalServerErrorResponse({ description: "알 수 없는 서버 오류" })
     );
   },
 
@@ -36,14 +33,21 @@ export const Docs: SwaggerMethodDoc<AuthController> = {
           "회원의 이메일과 비밀번호를 입력받아 인증 과정을 진행한 후 JWT를 발급합니다.",
       }),
       ApiBody({ type: LoginForm }),
-      ApiResponse({
-        status: HttpStatus.OK,
-        description: "로그인 성공",
-        type: LoginResponse,
+      ApiOkResponse({ description: "로그인 성공", type: LoginResponse }),
+      ApiInternalServerErrorResponse({ description: "알 수 없는 서버 오류" })
+    );
+  },
+
+  refresh(summary: string) {
+    return applyDecorators(
+      ApiOperation({
+        summary,
+        description:
+          "Refresh 토큰이 담긴 쿠키로 Access 토큰을 재발급 요청합니다.",
       }),
-      ApiResponse({
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-        description: "알 수 없는 서버 오류",
+      ApiOkResponse({
+        description: "Access 토큰 재발급 성공",
+        type: LoginResponse,
       })
     );
   },

@@ -1,5 +1,5 @@
 import { NestFactory } from "@nestjs/core";
-import { ValidationPipe } from "@nestjs/common";
+import { Logger, ValidationPipe } from "@nestjs/common";
 import { WINSTON_MODULE_NEST_PROVIDER } from "nest-winston";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import * as cookieParser from "cookie-parser";
@@ -11,66 +11,78 @@ import { HttpExceptionFilter, SuccessInterceptor } from "@/common";
 import { AppModule } from "./app.module";
 
 class Application {
+  private logger = new Logger(Application.name);
+  private DEV_MODE: boolean;
   private PORT: string;
-  private corsOriginList: string[];
-  private ADMIN_USER: string;
-  private ADMIN_PASSWORD: string;
 
   constructor(private app: NestExpressApplication) {
     this.app = app;
-
+    this.DEV_MODE = process.env.NODE_ENV === APP.NODE_ENV.DEVELOPMENT;
     this.PORT = process.env.PORT;
-    this.corsOriginList =
+  }
+
+  private setUpOpenAPIMiddleware() {
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle(APP.SWAGGER.TITLE)
+      .setDescription(APP.SWAGGER.DESCRIPTION)
+      .setVersion(APP.VERSION)
+      .addBearerAuth(
+        {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          in: "header",
+        },
+        "JWT"
+      )
+      .addSecurityRequirements("JWT")
+      .build();
+
+    SwaggerModule.setup(
+      APP.SWAGGER.PREFIX,
+      this.app,
+      SwaggerModule.createDocument(this.app, swaggerConfig)
+    );
+
+    this.app.use(
+      [APP.SWAGGER.PREFIX, APP.SWAGGER.PREFIX_JSON],
+      expressBasicAuth({
+        challenge: true,
+        users: {
+          [process.env.ADMIN_USER]: process.env.ADMIN_PASSWORD,
+        },
+      })
+    );
+  }
+
+  private async setUpGlobalMiddleware() {
+    const corsOriginList: string[] =
       process.env.NODE_ENV === APP.NODE_ENV.DEVELOPMENT
         ? ["*"]
         : process.env.CORS_ORIGIN_LIST.split(",").map((origin) =>
             origin.trim()
           );
 
-    this.ADMIN_USER = process.env.ADMIN_USER;
-    this.ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-  }
-
-  private setUpBasicAuth() {
-    this.app.use(
-      [APP.SWAGGER.PREFIX, APP.SWAGGER.PREFIX_JSON],
-      expressBasicAuth({
-        challenge: true,
-        users: {
-          [this.ADMIN_USER]: this.ADMIN_PASSWORD,
-        },
-      })
-    );
-  }
-
-  private setUpOpenAPIMiddleware() {
-    SwaggerModule.setup(
-      APP.SWAGGER.PREFIX,
-      this.app,
-      SwaggerModule.createDocument(
-        this.app,
-        new DocumentBuilder()
-          .setTitle(APP.SWAGGER.TITLE)
-          .setDescription(APP.SWAGGER.DESCRIPTION)
-          .setVersion(APP.VERSION)
-          .build()
-      )
-    );
-  }
-
-  private async setUpGlobalMiddleware() {
     this.app.enableCors({
-      origin: this.corsOriginList,
+      origin: corsOriginList,
       credentials: true,
     });
     this.app.use(cookieParser(process.env.COOKIE_SECRET));
-    this.setUpBasicAuth();
-    this.setUpOpenAPIMiddleware();
 
     this.app.useGlobalPipes(new ValidationPipe({ transform: true }));
     this.app.useGlobalInterceptors(new SuccessInterceptor());
     this.app.useGlobalFilters(new HttpExceptionFilter());
     this.app.useLogger(this.app.get(WINSTON_MODULE_NEST_PROVIDER));
+
+    this.setUpOpenAPIMiddleware();
+  }
+
+  startLog() {
+    if (this.DEV_MODE) {
+      this.logger.log(`✅ Server on http://localhost:${this.PORT}`);
+    } else {
+      this.logger.log(`✅ Server on port ${this.PORT}...`);
+    }
   }
 
   async bootstrap() {
@@ -86,6 +98,7 @@ async function init(): Promise<void> {
   });
   const app = new Application(server);
   await app.bootstrap();
+  app.startLog();
 }
 
 init();
