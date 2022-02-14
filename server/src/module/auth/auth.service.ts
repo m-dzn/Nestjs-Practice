@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import {
+  Get,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UseGuards,
+} from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
@@ -11,6 +17,7 @@ import { AUTH, SNSProvider, User, UserSummary } from "@/module/users";
 import { JWT } from "./auth.constant";
 import { JoinForm, OAuthRequest } from "./dto";
 import { JWTPayload } from "./interfaces";
+import { CurrentUser, JwtAuthGuard } from "@/module/auth";
 
 @Injectable()
 export class AuthService {
@@ -20,6 +27,12 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly config: ConfigService
   ) {}
+
+  @Get("/me")
+  @UseGuards(JwtAuthGuard)
+  async getMe(@CurrentUser() user: User) {
+    return new UserSummary(user);
+  }
 
   async join({ email, name, password }: JoinForm): Promise<UserSummary> {
     const exUser = await this.userRepository.findOne({ email });

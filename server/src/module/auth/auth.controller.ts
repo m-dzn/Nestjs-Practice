@@ -7,7 +7,7 @@ import { APP } from "@/constants";
 import { User, UserSummary } from "@/module/users";
 
 import { CurrentUser } from "./decorators";
-import { LocalAuthGuard, KakaoAuthGuard } from "./guards";
+import { LocalAuthGuard, JwtRefreshAuthGuard, KakaoAuthGuard } from "./guards";
 import { JoinForm, LoginResponse } from "./dto";
 import { Docs } from "./auth.docs";
 import { AuthService } from "./auth.service";
@@ -34,9 +34,19 @@ export class AuthController {
     @CurrentUser() user: User,
     @Res({ passthrough: true }) res: Response
   ): Promise<LoginResponse> {
+    const accessToken = this.authService.getAccessToken({ id: user.id });
     this.setRefreshTokenCookie(user, res);
 
-    return this.getLoginResponse(user);
+    return { accessToken };
+  }
+
+  @Docs.refresh("Access 토큰 Refresh 요청")
+  @Get("refresh")
+  @UseGuards(JwtRefreshAuthGuard)
+  refresh(@CurrentUser() user: User): LoginResponse {
+    const accessToken = this.authService.getAccessToken({ id: user.id });
+
+    return { accessToken };
   }
 
   @Docs.kakao("카카오 회원가입/로그인")
@@ -54,24 +64,22 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response
   ): Promise<void> {
     const accessToken = this.authService.getAccessToken({ id: user.id });
-    this.setRefreshTokenCookie(user, res);
+    await this.setRefreshTokenCookie(user, res);
 
     res.redirect(
       `${this.config.get("CLIENT_BASE_URL")}/oauth?token=${accessToken}`
     );
   }
 
-  private async setRefreshTokenCookie(user: User, res: Response) {
+  private async setRefreshTokenCookie(
+    user: User,
+    res: Response
+  ): Promise<void> {
     const refreshToken = await this.authService.getRefreshToken({
       id: user.id,
     });
+    console.log(refreshToken);
 
     res.cookie(APP.COOKIE.REFRESH_TOKEN, refreshToken, refreshTokenOptions);
-  }
-
-  private getLoginResponse(user: User): LoginResponse {
-    const accessToken = this.authService.getAccessToken({ id: user.id });
-
-    return { accessToken };
   }
 }

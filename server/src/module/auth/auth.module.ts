@@ -6,7 +6,12 @@ import { JwtModule } from "@nestjs/jwt";
 
 import { User } from "@/module/users";
 
-import { LocalStrategy, JwtStrategy, KakaoStrategy } from "./strategies";
+import {
+  LocalStrategy,
+  JwtStrategy,
+  JwtRefreshStrategy,
+  KakaoStrategy,
+} from "./strategies";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { JWT } from "./auth.constant";
@@ -25,8 +30,15 @@ import { JWT } from "./auth.constant";
         },
       }),
     }),
+    AuthModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy, KakaoStrategy],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    JwtRefreshStrategy,
+    KakaoStrategy,
+  ],
 })
 export class AuthModule {}

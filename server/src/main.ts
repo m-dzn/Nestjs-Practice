@@ -29,13 +29,12 @@ class Application {
       .addBearerAuth(
         {
           type: "http",
-          scheme: "bearer",
-          bearerFormat: "JWT",
-          in: "header",
+          description:
+            "Http Request의 Authorization 헤더로 넘어올 JWT access 토큰을 넣어주세요",
         },
-        "JWT"
+        "Access Token"
       )
-      .addSecurityRequirements("JWT")
+      .addSecurityRequirements("Access Token")
       .build();
 
     SwaggerModule.setup(
